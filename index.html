@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RoboQuest: Robot Rescue Mission | PhysicsFlow</title>
+<style>
+:root{--navy:#0D2540;--teal:#0AAEB0;--teal2:#2EC4B6;--amber:#F2A541;--ink:#1A354E;--light:#F2F7F9;--red:#D9534F;--green:#2E9E5B;--line:#CFDDE5}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--light);color:var(--ink);font-family:Calibri,Carlito,"Segoe UI",Arial,sans-serif;font-size:16px}
+header{background:var(--navy);color:#fff;padding:10px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header .logo{width:42px;height:42px}
+header h1{font-size:22px;margin:0;font-weight:700;letter-spacing:.3px}
+header h1 small{display:block;font-size:13px;font-weight:400;color:#9fd9da}
+header .who{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:14px}
+header input{border:0;border-radius:6px;padding:6px 8px;font:inherit;width:170px}
+nav{display:flex;gap:4px;background:var(--ink);padding:0 12px;flex-wrap:wrap}
+nav button{background:none;border:0;color:#cfe6ea;padding:11px 14px;font:inherit;font-size:15px;cursor:pointer;border-bottom:3px solid transparent}
+nav button.on{color:#fff;border-bottom-color:var(--amber);font-weight:700}
+nav button .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#56708a;margin-left:6px;vertical-align:middle}
+nav button .dot.ok{background:var(--teal2)}
+main{max-width:1180px;margin:0 auto;padding:16px}
+.panel{display:none}.panel.on{display:block}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+h2{margin:0 0 6px;color:var(--navy);font-size:22px}
+h3{margin:0 0 8px;color:var(--navy);font-size:17px}
+p{margin:6px 0;line-height:1.4}
+.grid{display:grid;grid-template-columns:330px 1fr;gap:14px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.brief{background:#E8F6F6;border-left:5px solid var(--teal);padding:10px 12px;border-radius:8px;font-size:15px}
+.brief b{color:var(--navy)}
+.fixed{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;font-size:14px;margin-top:6px}
+.fixed span:nth-child(odd){color:#4a6378}
+.ctl{margin:10px 0}
+.ctl label.t{display:block;font-weight:700;font-size:14px;margin-bottom:5px;color:var(--navy)}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.opts button{border:2px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;font:inherit;font-size:14px;cursor:pointer;color:var(--ink);min-width:54px}
+.opts button.on{border-color:var(--teal);background:#DDF4F4;font-weight:700}
+.opts.cards button{flex:1 1 92px;text-align:left;line-height:1.25}
+.opts.cards button small{display:block;font-weight:400;color:#4a6378;font-size:12px}
+.run{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{border:0;border-radius:9px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer}
+.btn.go{background:var(--amber);color:var(--navy);font-size:17px;flex:1}
+.btn.sec{background:var(--ink);color:#fff}
+.btn.ghost{background:#fff;border:2px solid var(--line);color:var(--ink)}
+.chk{font-size:13px;display:flex;gap:6px;align-items:center;margin-top:8px;color:#4a6378}
+canvas{width:100%;height:auto;display:block;border-radius:10px;background:#fff}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:10px}
+.tile{border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:#fff}
+.tile .k{font-size:12px;color:#4a6378}
+.tile .v{font-size:19px;font-weight:700;color:var(--navy)}
+.tile.ok{border-color:var(--teal2);background:#EFFAF9}
+.tile.bad{border-color:#E7A3A1;background:#FDF0EF}
+.verdict{margin-top:10px;padding:10px 12px;border-radius:9px;font-weight:700;font-size:16px}
+.verdict.ok{background:#DFF5EC;color:#17603A}
+.verdict.bad{background:#FBE3E2;color:#8A2421}
+.verdict.wait{background:#EEF3F6;color:#4a6378;font-weight:400}
+.verdict ul{margin:4px 0 0 18px;font-weight:400}
+.bar{height:16px;background:#E6EEF2;border-radius:8px;position:relative;overflow:visible;margin:4px 0 12px}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:8px}
+.bar b{position:absolute;top:-4px;bottom:-4px;width:3px;background:var(--navy)}
+table{border-collapse:collapse;width:100%;font-size:14px;background:#fff}
+th,td{border:1px solid var(--line);padding:5px 7px;text-align:center}
+th{background:var(--navy);color:#fff;font-weight:700}
+tr.best td{background:#FFF1D6;font-weight:700}
+tr.best td:first-child::before{content:"★ ";color:#C47F00}
+td.pass{color:var(--green);font-weight:700}td.fail{color:var(--red);font-weight:700}
+.tablewrap{overflow-x:auto}
+.note{font-size:13px;color:#4a6378}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:880px){.two{grid-template-columns:1fr}}
+.eq{font-family:Cambria,Caladea,Georgia,serif;font-size:17px;background:#F7FAFB;border:1px solid var(--line);border-radius:8px;padding:6px 10px;display:inline-block;margin:3px 0}
+details{margin-top:8px}summary{cursor:pointer;font-weight:700;color:var(--navy)}
+.block{cursor:pointer}
+.block:hover rect{stroke:var(--amber);stroke-width:3}
+.infobox{min-height:120px}
+.pill{display:inline-block;background:var(--navy);color:#fff;border-radius:20px;padding:2px 10px;font-size:13px;margin-right:6px}
+.start-steps li{margin:6px 0}
+footer{text-align:center;font-size:12px;color:#6b8193;padding:20px}
+input[type=range]{width:100%}
+</style>
+</head>
+<body>
+<header>
+  <svg class="logo" viewBox="0 0 48 48" aria-hidden="true"><rect x="3" y="3" width="42" height="42" rx="10" fill="#0AAEB0"/><rect x="12" y="14" width="24" height="18" rx="5" fill="#fff"/><circle cx="19" cy="23" r="3" fill="#0D2540"/><circle cx="29" cy="23" r="3" fill="#0D2540"/><rect x="22" y="7" width="4" height="7" fill="#fff"/><circle cx="24" cy="7" r="3" fill="#F2A541"/><rect x="15" y="34" width="5" height="6" fill="#fff"/><rect x="28" y="34" width="5" height="6" fill="#fff"/></svg>
+  <h1>RoboQuest: Robot Rescue Mission<small>Robotics &amp; Mechatronics Engineering Lab · PhysicsFlow</small></h1>
+  <div class="who"><label for="sname">Name</label><input id="sname" placeholder="Your name"><label for="sclass">Class</label><input id="sclass" style="width:80px" placeholder="Period"></div>
+</header>
+<nav id="tabs">
+  <button data-p="start" class="on">Start</button>
+  <button data-p="m1">1 · Precision Sorting<span class="dot" id="d1"></span></button>
+  <button data-p="m2">2 · Obstacle Avoidance<span class="dot" id="d2"></span></button>
+  <button data-p="m3">3 · Rescue Run<span class="dot" id="d3"></span></button>
+  <button data-p="elec">Electronics Bench</button>
+  <button data-p="data">My Trials &amp; Export</button>
+</nav>
+<main>
+<!-- START -->
+<section class="panel on" id="p-start">
+  <div class="card">
+    <h2>Your job: engineer one rescue robot</h2>
+    <p>A warehouse fire has cut off a field clinic. Your team must design <b>one robot</b> that sorts medical supplies, drives safely past obstacles, and carries the supplies to the clinic before its battery runs low. You will build the robot up in three missions.</p>
+    <div class="two">
+      <div>
+        <h3>The three missions</h3>
+        <p><span class="pill">1</span><b>Precision Sorting:</b> choose a motor, gear ratio and arm length so the arm can lift every pack (torque) without moving too fast.</p>
+        <p><span class="pill">2</span><b>Obstacle Avoidance:</b> choose a sensor and a speed so the robot can always stop before it hits something (stopping distance).</p>
+        <p><span class="pill">3</span><b>Rescue Run:</b> choose sensor, speed and load so the robot delivers all supplies fast while keeping 20% battery (energy and power).</p>
+      </div>
+      <div>
+        <h3>How to work like an engineer</h3>
+        <ol class="start-steps">
+          <li>Read the mission brief. The fixed values are your constraints.</li>
+          <li>Predict, then press <b>Run test</b>. Every test is saved in your trial table.</li>
+          <li>Change <b>one setting at a time</b> (fair test) and watch what changes.</li>
+          <li>The starting design always fails. Find a design that passes, then find the <b>best</b> one.</li>
+          <li>The best passing trial in each mission gets a ★ in the table.</li>
+          <li>Export your trials (CSV) when you finish.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Key physics you will use</h3>
+    <div class="eq">τ = F × r</div> <div class="eq">output torque = motor torque × gear ratio × efficiency</div> <div class="eq">v = ω × r</div><br>
+    <div class="eq">stopping distance = v<sub>i</sub> × t<sub>reaction</sub> + v<sub>i</sub><sup>2</sup> ÷ (2a)</div> <div class="eq">a = F ÷ m</div><br>
+    <div class="eq">P = F × v</div> <div class="eq">E = P × t</div> <div class="eq">P = V × I</div> <div class="eq">battery energy (Wh) = V × Ah</div>
+    <p class="note">The lab uses a simplified engineering model. Real robots also deal with friction changes, motor heating and sensor noise, but the trade-offs are real.</p>
+  </div>
+</section>
+
+<!-- MISSION 1 -->
+<section class="panel" id="p-m1">
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2>Mission 1 · Precision Sorting</h2>
+        <div class="brief"><b>Goal:</b> sort 6 supply packs into colored bins as fast as possible. The arm must lift the heaviest pack with a <b>safety factor of 1.5</b>, reach the bins, and keep the gripper tip at or below <b>1.0 m/s</b> so the color sensor can read each pack.
+          <div class="fixed">
+            <span>Bin distance</span><span>0.38 m</span>
+            <span>Packs (kg)</span><span>0.20, 0.35, 0.50</span>
+            <span>Gripper + color sensor</span><span>0.15 kg</span>
+            <span>Arm mass</span><span>0.50 kg per m</span>
+            <span>Gearbox efficiency</span><span>80%</span>
+            <span>Swing per pack</span><span>180° there + 180° back, plus 2.0 s grip</span>
+            <span>Packs to sort</span><span>6 (2 of each color)</span>
+            <span>Time limit</span><span>45 s</span>
+            <span>Motor supply</span><span>12 V</span>
+          </div>
+          <p style="margin-top:8px"><b>Best design:</b> the shortest time that passes every check.</p>
+          <details><summary>Model notes (motors)</summary><p class="note">Each motor is used at its <b>rated point</b>: it gives its rated torque while turning at its rated speed. A real DC motor has a torque–speed line: it spins faster when lightly loaded and slows down as the load approaches stall. Using the rated point keeps the model simple and safe, because the arm never needs more than the rated torque.</p></details>
+        </div>
+        <div class="ctl"><label class="t">Motor</label>
+          <div class="opts cards" id="m1motor">
+            <button data-v="A">Motor A "Sprint"<small>rated 0.030 N·m at 6000 rpm</small></button>
+            <button data-v="B">Motor B "Balance"<small>rated 0.070 N·m at 3000 rpm</small></button>
+            <button data-v="C">Motor C "Muscle"<small>rated 0.150 N·m at 1200 rpm</small></button>
+          </div></div>
+        <div class="ctl"><label class="t">Gear ratio (motor turns : arm turns)</label><div class="opts" id="m1gear"></div></div>
+        <div class="ctl"><label class="t">Arm length</label><div class="opts" id="m1len"></div></div>
+        <div class="run"><button class="btn go" id="m1run">▶ Run test</button><button class="btn ghost" id="m1reset">Reset</button></div>
+        <label class="chk"><input type="checkbox" id="m1fast"> Skip the animation</label>
+      </div>
+    </div>
+    <div>
+      <div class="card"><canvas id="c1" width="760" height="380"></canvas>
+        <div id="m1out"><div class="verdict wait">Choose your settings, predict what will happen, then press Run test.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card"><h3>Mission 1 trials</h3><div class="tablewrap" id="t1"></div></div>
+</section>
+
+<!-- MISSION 2 -->
+<section class="panel" id="p-m2">
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2>Mission 2 · Obstacle Avoidance</h2>
+        <div class="brief"><b>Goal:</b> drive the empty robot down a 60 m corridor as fast as possible. Four times, a worker or box appears at the edge of your sensor's range. The robot must stop with at least <b>0.30 m</b> to spare every time.
+          <div class="fixed">
+            <span>Robot mass</span><span>20 kg</span>
+            <span>Brake force</span><span>50 N</span>
+            <span>Safety gap</span><span>0.30 m</span>
+            <span>Corridor</span><span>60 m, 4 obstacles</span>
+            <span>Speed-up rate</span><span>1.25 m/s²</span>
+            <span>Wait per obstacle</span><span>1.5 s</span>
+            <span>Time limit</span><span>60 s</span>
+          </div>
+          <p style="margin-top:8px"><b>Best design:</b> the shortest course time that passes.</p>
+        </div>
+        <div class="ctl"><label class="t">Sensor</label>
+          <div class="opts cards" id="m2sensor">
+            <button data-v="IR">Infrared<small>range 1.5 m · react 0.05 s</small></button>
+            <button data-v="US">Ultrasonic<small>range 4.0 m · react 0.30 s</small></button>
+            <button data-v="LI">LiDAR<small>range 8.0 m · react 0.10 s</small></button>
+          </div></div>
+        <div class="ctl"><label class="t">Cruise speed: <span id="m2vlab"></span></label><input type="range" id="m2v" min="0" max="14" step="1"></div>
+        <div class="run"><button class="btn go" id="m2run">▶ Run test</button><button class="btn ghost" id="m2reset">Reset</button></div>
+        <label class="chk"><input type="checkbox" id="m2fast"> Skip the animation</label>
+      </div>
+    </div>
+    <div>
+      <div class="card"><canvas id="c2" width="760" height="380"></canvas>
+        <div id="m2out"><div class="verdict wait">Reaction time + braking: can your robot stop inside its sensor range?</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card"><h3>Mission 2 trials</h3><div class="tablewrap" id="t2"></div></div>
+</section>
+
+<!-- MISSION 3 -->
+<section class="panel" id="p-m3">
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2>Mission 3 · Rescue Run</h2>
+        <div class="brief"><b>Goal:</b> deliver 12 kg of medical supplies to the clinic 300 m away, coming back empty after each trip. Earn the highest <b>Rescue Score</b> = battery left (%) + 2 × minutes under the 20-minute limit.
+          <div class="fixed">
+            <span>Battery</span><span>24 V, 1.0 Ah</span>
+            <span>Keep in reserve</span><span>at least 20%</span>
+            <span>Motor driver limit</span><span>4.0 A</span>
+            <span>Robot mass</span><span>20 kg (+ load)</span>
+            <span>Brake force</span><span>50 N</span>
+            <span>Computer + radio</span><span>5 W + sensor</span>
+            <span>Docking (each trip)</span><span>20 s, arm 15 W</span>
+            <span>Time limit</span><span>20 min</span>
+          </div>
+          <p style="margin-top:8px"><b>Best design:</b> the highest Rescue Score that passes every check.</p>
+          <details><summary>Model notes (resistive forces)</summary><p class="note">Driving force needed F = rolling resistance + terrain drag = 0.06 × m × g + 0.8 × v². Drive efficiency is 70%, so drive power = F × v ÷ 0.70. Sensor power: IR 0.5 W, ultrasonic 1.0 W, LiDAR 8.0 W.</p></details>
+        </div>
+        <div class="ctl"><label class="t">Sensor</label>
+          <div class="opts cards" id="m3sensor">
+            <button data-v="IR">Infrared<small>1.5 m · 0.5 W</small></button>
+            <button data-v="US">Ultrasonic<small>4.0 m · 1.0 W</small></button>
+            <button data-v="LI">LiDAR<small>8.0 m · 8.0 W</small></button>
+          </div></div>
+        <div class="ctl"><label class="t">Cruise speed: <span id="m3vlab"></span></label><input type="range" id="m3v" min="0" max="14" step="1"></div>
+        <div class="ctl"><label class="t">Load per trip</label><div class="opts" id="m3load"></div></div>
+        <div class="run"><button class="btn go" id="m3run">▶ Run test</button><button class="btn ghost" id="m3reset">Reset</button></div>
+        <label class="chk"><input type="checkbox" id="m3fast"> Skip the animation</label>
+      </div>
+    </div>
+    <div>
+      <div class="card"><canvas id="c3" width="760" height="380"></canvas>
+        <div id="m3out"><div class="verdict wait">Faster saves time but costs energy. Heavier loads mean fewer trips but longer stops and more current.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card"><h3>Mission 3 trials</h3><div class="tablewrap" id="t3"></div></div>
+</section>
+
+<!-- ELECTRONICS -->
+<section class="panel" id="p-elec">
+  <div class="card">
+    <h2>Electronics Bench: how your robot is wired</h2>
+    <p>Tap a block to see what it does and how it connects. Power flows along the thick lines; signals flow along the thin dashed lines.</p>
+    <div class="two">
+      <svg id="wiring" viewBox="0 0 560 380" style="width:100%;background:#fff;border:1px solid var(--line);border-radius:10px">
+        <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#1A354E"/></marker></defs>
+        <g stroke="#F2A541" stroke-width="6" fill="none" stroke-linejoin="round">
+          <path d="M95,80 H160"/><path d="M230,80 H300"/><path d="M265,80 V34 H492 V165"/><path d="M492,215 V265"/>
+        </g>
+        <path d="M355,105 V165" stroke="#F2A541" stroke-width="3" fill="none"/>
+        <g stroke="#1A354E" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-end="url(#ar)">
+          <path d="M380,190 H438"/><path d="M440,295 H340 V218"/><path d="M120,250 H255 V182 H298"/><path d="M120,320 H240 V202 H298"/>
+        </g>
+        <g class="block" data-b="bat"><rect x="15" y="50" width="80" height="60" rx="8" fill="#FFF1D6" stroke="#C47F00" stroke-width="2"/><text x="55" y="76" text-anchor="middle" font-size="14" font-weight="700" fill="#0D2540">Battery</text><text x="55" y="96" text-anchor="middle" font-size="12" fill="#1A354E">24 V · 1.0 Ah</text></g>
+        <g class="block" data-b="fuse"><rect x="160" y="55" width="70" height="50" rx="8" fill="#fff" stroke="#1A354E" stroke-width="2"/><text x="195" y="78" text-anchor="middle" font-size="13" font-weight="700" fill="#0D2540">Fuse +</text><text x="195" y="95" text-anchor="middle" font-size="13" font-weight="700" fill="#0D2540">E-stop</text></g>
+        <g class="block" data-b="reg"><rect x="300" y="50" width="110" height="55" rx="8" fill="#E8F6F6" stroke="#0AAEB0" stroke-width="2"/><text x="355" y="74" text-anchor="middle" font-size="13" font-weight="700" fill="#0D2540">Regulator</text><text x="355" y="92" text-anchor="middle" font-size="12" fill="#1A354E">24 V → 5 V</text></g>
+        <g class="block" data-b="mcu"><rect x="300" y="165" width="80" height="50" rx="8" fill="#0D2540" stroke="#0D2540" stroke-width="2"/><text x="340" y="187" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Micro-</text><text x="340" y="203" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">controller</text></g>
+        <g class="block" data-b="drv"><rect x="440" y="165" width="105" height="50" rx="8" fill="#E8F6F6" stroke="#0AAEB0" stroke-width="2"/><text x="492" y="187" text-anchor="middle" font-size="12" font-weight="700" fill="#0D2540">Motor driver</text><text x="492" y="203" text-anchor="middle" font-size="11" fill="#1A354E">H-bridge · 4.0 A</text></g>
+        <g class="block" data-b="mot"><rect x="440" y="265" width="105" height="60" rx="8" fill="#fff" stroke="#1A354E" stroke-width="2"/><text x="492" y="288" text-anchor="middle" font-size="12" font-weight="700" fill="#0D2540">DC motors</text><text x="492" y="305" text-anchor="middle" font-size="11" fill="#1A354E">+ encoders</text></g>
+        <g class="block" data-b="sens"><rect x="15" y="225" width="105" height="50" rx="8" fill="#fff" stroke="#1A354E" stroke-width="2"/><text x="67" y="247" text-anchor="middle" font-size="12" font-weight="700" fill="#0D2540">Distance sensor</text><text x="67" y="263" text-anchor="middle" font-size="11" fill="#1A354E">IR · ultrasonic · LiDAR</text></g>
+        <g class="block" data-b="enc"><rect x="15" y="295" width="105" height="50" rx="8" fill="#fff" stroke="#1A354E" stroke-width="2"/><text x="67" y="317" text-anchor="middle" font-size="12" font-weight="700" fill="#0D2540">Color sensor</text><text x="67" y="333" text-anchor="middle" font-size="11" fill="#1A354E">on the gripper</text></g>
+        <text x="384" y="182" font-size="11" fill="#4a6378">PWM</text>
+        <text x="350" y="290" font-size="11" fill="#4a6378">encoder feedback</text>
+        <text x="362" y="140" font-size="11" fill="#9A6A12">5 V</text>
+        <text x="380" y="27" font-size="11" fill="#9A6A12">24 V to motors</text>
+        <text x="132" y="243" font-size="11" fill="#4a6378">sense →</text>
+        <rect x="15" y="10" width="16" height="6" fill="#F2A541"/><text x="36" y="17" font-size="11" fill="#1A354E">power</text>
+        <line x1="80" y1="13" x2="100" y2="13" stroke="#1A354E" stroke-width="2" stroke-dasharray="6 4"/><text x="105" y="17" font-size="11" fill="#1A354E">signal</text>
+      </svg>
+      <div class="card infobox" id="einfo" style="margin:0"><h3>Sense → Think → Act</h3><p>Every robot runs the same loop many times per second: <b>sensors</b> measure the world, the <b>microcontroller</b> decides, and <b>actuators</b> (motors) move. Tap any block on the diagram.</p></div>
+    </div>
+  </div>
+  <div class="two">
+    <div class="card">
+      <h3>Ultrasonic echo timer</h3>
+      <p>An ultrasonic sensor sends a click of sound and times the echo. Sound travels <b>to the object and back</b>, so distance = 343 m/s × time ÷ 2.</p>
+      <label class="t">Object distance: <b id="usd">2.00 m</b></label><input type="range" id="usr" min="0.1" max="4" step="0.05" value="2">
+      <canvas id="cus" width="520" height="120"></canvas>
+      <p>Echo time: <b id="ust"></b></p>
+    </div>
+    <div class="card">
+      <h3>PWM motor speed</h3>
+      <p>The microcontroller switches the motor's 24 V on and off very fast. The fraction of time it is on is the <b>duty cycle</b>. Average voltage = duty cycle × 24 V, and a DC motor's speed rises with its voltage.</p>
+      <label class="t">Duty cycle: <b id="pwmd">50%</b></label><input type="range" id="pwmr" min="0" max="100" step="5" value="50">
+      <canvas id="cpwm" width="520" height="120"></canvas>
+      <p>Average voltage: <b id="pwmv"></b> · Wheel speed (no load): <b id="pwms"></b></p>
+    </div>
+  </div>
+</section>
+
+<!-- DATA -->
+<section class="panel" id="p-data">
+  <div class="card">
+    <h2>My trials &amp; export</h2>
+    <p>Your trials are saved in this browser. Export a CSV file to open in a spreadsheet or upload to your teacher.</p>
+    <div class="run" style="max-width:640px"><button class="btn sec" id="csv">⬇ Export all trials (CSV)</button><button class="btn ghost" id="print">🖨 Print summary</button><button class="btn ghost" id="clear">Clear all trials</button></div>
+    <div id="summary" style="margin-top:12px"></div>
+  </div>
+</section>
+</main>
+<footer>RoboQuest · Robot Rescue Mission · © PhysicsFlow · For use by the purchasing teacher and their students.</footer>
+<script>
+// RoboQuest model — shared by the lab and the answer-key scripts
+(function(root){
+const g = 9.8;
+const M1 = {
+  motors: {
+    A: {name:'Motor A "Sprint"', torque:0.030, rpm:6000},
+    B: {name:'Motor B "Balance"', torque:0.070, rpm:3000},
+    C: {name:'Motor C "Muscle"', torque:0.150, rpm:1200}
+  },
+  gears:[10,20,30,50,75,100,150],
+  lengths:[0.30,0.40,0.50,0.60],
+  objects:[{color:'red',mass:0.20},{color:'blue',mass:0.35},{color:'green',mass:0.50}],
+  itemsToSort:6, binReach:0.38, gripperMass:0.15, armMassPerM:0.50, gearEff:0.80,
+  safety:1.5, tipMax:1.0, swingAngleDeg:360, gripTime:2.0, timeLimit:45, motorEff:0.75, volts:12
+};
+function m1(motorKey, gear, L){
+  const m = M1.motors[motorKey];
+  const wm = m.rpm*2*Math.PI/60;
+  const tauOut = m.torque*gear*M1.gearEff;
+  const wj = wm/gear;                       // joint angular speed, rad/s
+  const tip = wj*L;                         // gripper tip speed, m/s
+  const armMass = M1.armMassPerM*L;
+  const tauNeed = M1.objects.map(o => (o.mass+M1.gripperMass)*g*L + armMass*g*L/2);
+  const tauNeedMax = Math.max(...tauNeed);
+  const tauSafe = tauNeedMax*M1.safety;
+  const swing = M1.swingAngleDeg*Math.PI/180;
+  const cycle = swing/wj + M1.gripTime;
+  const total = cycle*M1.itemsToSort;
+  const pMech = m.torque*wm;                // motor mechanical power at rated point
+  const current = pMech/M1.motorEff/M1.volts;
+  const reachOK = L >= M1.binReach;
+  const torqueOK = tauOut >= tauSafe;
+  const tipOK = tip <= M1.tipMax + 1e-9;
+  const timeOK = total <= M1.timeLimit + 1e-9;
+  const lifts = tauNeed.map(t => tauOut >= t*M1.safety);
+  const pass = reachOK && torqueOK && tipOK && timeOK;
+  const fails=[];
+  if(!reachOK) fails.push('Arm too short to reach the bins');
+  if(!torqueOK) fails.push('Not enough torque (safety factor 1.5)');
+  if(!tipOK) fails.push('Gripper moves too fast for the color sensor');
+  if(!timeOK) fails.push('Too slow: over the time limit');
+  return {motor:motorKey, gear, L, tauOut, tauNeed, tauNeedMax, tauSafe, wj, tip, cycle, total, pMech, current, reachOK, torqueOK, tipOK, timeOK, lifts, pass, fails};
+}
+const M2 = {
+  sensors: {
+    IR:  {name:'Infrared (IR)', range:1.5, react:0.05, power:0.5},
+    US:  {name:'Ultrasonic', range:4.0, react:0.30, power:1.0},
+    LI:  {name:'LiDAR', range:8.0, react:0.10, power:8.0}
+  },
+  speeds:[0.50,0.75,1.00,1.25,1.50,1.75,2.00,2.25,2.50,2.75,3.00,3.25,3.50,3.75,4.00],
+  robotMass:20, brakeForce:50, accel:1.25, buffer:0.30, course:60, obstacles:4, wait:1.5, timeLimit:60
+};
+function stopping(v, react, a){ const r=v*react, b=v*v/(2*a); return {reaction:r, braking:b, total:r+b}; }
+function m2(sensorKey, v){
+  const s = M2.sensors[sensorKey];
+  const a = M2.brakeForce/M2.robotMass;
+  const st = stopping(v, s.react, a);
+  const allowed = s.range - M2.buffer;
+  const perStopLoss = v/(2*a) + v/(2*M2.accel) + M2.wait;
+  const total = M2.course/v + M2.obstacles*perStopLoss;
+  const stopOK = st.total <= allowed + 1e-9;
+  const timeOK = total <= M2.timeLimit + 1e-9;
+  const echo = sensorKey==='US' ? 2*s.range/343 : null;
+  const fails=[];
+  if(!stopOK) fails.push('Cannot stop in time: crash!');
+  if(!timeOK) fails.push('Too slow: over the time limit');
+  return {sensor:sensorKey, v, a, reaction:st.reaction, braking:st.braking, stop:st.total, allowed, margin: allowed-st.total, time:total, stopOK, timeOK, pass: stopOK&&timeOK, fails, echo};
+}
+const M3 = {
+  loads:[2,3,4,6], totalSupplies:12, distance:300, robotMass:20, brakeForce:50, buffer:0.30,
+  crr:0.06, drag:0.8, driveEff:0.70, basePower:5.0, dockTime:20, armPower:15,
+  volts:24, ampHours:1.0, reserve:0.20, maxCurrent:4.0, timeLimit:20*60, speeds:M2.speeds
+};
+M3.capacityWh = M3.volts*M3.ampHours;
+function m3(sensorKey, v, load){
+  const s = M2.sensors[sensorKey];
+  // trips: each trip carries `load` kg; the last trip carries whatever is left
+  const tripLoads=[]; let left=M3.totalSupplies; while(left>1e-9){ const L=Math.min(load,left); tripLoads.push(L); left-=L; }
+  const trips = tripLoads.length;
+  const mLoaded = M3.robotMass+load, mEmpty = M3.robotMass;   // heaviest trip sets the stopping and current checks
+  const aLoaded = M3.brakeForce/mLoaded;
+  const st = stopping(v, s.react, aLoaded);
+  const allowed = s.range - M3.buffer;
+  const legTime = M3.distance/v;
+  const Floaded = M3.crr*mLoaded*g + M3.drag*v*v;
+  const Fempty  = M3.crr*mEmpty*g + M3.drag*v*v;
+  const pDriveLoaded = Floaded*v/M3.driveEff, pDriveEmpty = Fempty*v/M3.driveEff;
+  const pElec = M3.basePower + s.power;
+  let E = 0;
+  tripLoads.forEach(L=>{ const F = M3.crr*(M3.robotMass+L)*g + M3.drag*v*v; E += (F*v/M3.driveEff+pElec)*legTime + (pDriveEmpty+pElec)*legTime + M3.armPower*M3.dockTime; });
+  const Etrip = E/trips;                 // average energy per trip (joules)
+  const Ewh = E/3600;
+  const used = Ewh/M3.capacityWh;
+  const time = trips*(2*legTime + M3.dockTime);
+  const avgPower = E/time;
+  const avgCurrent = avgPower/M3.volts;
+  const peakCurrent = (pDriveLoaded+pElec)/M3.volts;   // current while driving loaded
+  const currentOK = peakCurrent <= M3.maxCurrent + 1e-9;
+  const stopOK = st.total <= allowed + 1e-9;
+  const batteryOK = used <= 1-M3.reserve + 1e-9;
+  const timeOK = time <= M3.timeLimit + 1e-9;
+  const batteryLeft = 100*(1-used);
+  const minutesUnder = (M3.timeLimit-time)/60;
+  const score = batteryLeft + 2*minutesUnder;       // Rescue Score
+  const fails=[];
+  if(!stopOK) fails.push('Loaded robot cannot stop in time');
+  if(!currentOK) fails.push('Motor driver overloaded (over 4.0 A)');
+  if(!batteryOK) fails.push('Battery reserve below 20%');
+  if(!timeOK) fails.push('Too slow: over the 20-minute limit');
+  return {sensor:sensorKey, v, load, trips, aLoaded, reaction:st.reaction, braking:st.braking, stop:st.total, allowed, margin:allowed-st.total, legTime, Floaded, Fempty, pDriveLoaded, pDriveEmpty, pElec, Etrip, E, Ewh, used, time, avgPower, avgCurrent, batteryLeft, minutesUnder, score, peakCurrent, currentOK, stopOK, batteryOK, timeOK, pass: stopOK&&currentOK&&batteryOK&&timeOK, fails};
+}
+const START = { m1:{motor:'A', gear:10, L:0.30}, m2:{sensor:'US', v:4.0}, m3:{sensor:'LI', v:3.0, load:6} };
+const api = {g, M1, M2, M3, m1, m2, m3, stopping, START};
+if(typeof module!=='undefined' && module.exports) module.exports = api; else root.RQ = api;
+})(this);
+
+</script>
+<script>
+(function(){
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const C={navy:'#0D2540',teal:'#0AAEB0',teal2:'#2EC4B6',amber:'#F2A541',ink:'#1A354E',light:'#F2F7F9',red:'#D9534F',green:'#2E9E5B',grey:'#9AB0BF'};
+const fx=(x,d=2)=>Number(x).toFixed(d);
+// ---------- storage ----------
+const KEY='roboquest-trials-v1';
+let S={m1:[],m2:[],m3:[],name:'',klass:''};
+try{const raw=localStorage.getItem(KEY); if(raw){const o=JSON.parse(raw); if(o&&o.m1) S=Object.assign(S,o);} }catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+$('#sname').value=S.name||''; $('#sclass').value=S.klass||'';
+$('#sname').oninput=e=>{S.name=e.target.value;save()}; $('#sclass').oninput=e=>{S.klass=e.target.value;save()};
+// ---------- tabs ----------
+$$('#tabs button').forEach(b=>b.onclick=()=>{ $$('#tabs button').forEach(x=>x.classList.toggle('on',x===b)); $$('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.p)); if(b.dataset.p==='data') renderSummary(); drawAll(); });
+// ---------- option groups ----------
+function group(sel, values, label, init, onchange){
+  const el=$(sel); if(values){ el.innerHTML=values.map(v=>`<button data-v="${v}">${label(v)}</button>`).join(''); }
+  let cur=String(init);
+  const btns=Array.from(el.querySelectorAll('button'));
+  const set=(v,quiet)=>{cur=String(v); btns.forEach(b=>b.classList.toggle('on',b.dataset.v===cur)); if(!quiet&&onchange) onchange(cur)};
+  btns.forEach(b=>b.onclick=()=>set(b.dataset.v)); set(cur,true);
+  return {get:()=>cur,set};
+}
+const st={m1:{...RQ.START.m1}, m2:{...RQ.START.m2}, m3:{...RQ.START.m3}};
+const g1m=group('#m1motor',null,null,st.m1.motor,v=>{st.m1.motor=v;draw1()});
+const g1g=group('#m1gear',RQ.M1.gears,v=>v+':1',st.m1.gear,v=>{st.m1.gear=+v;draw1()});
+const g1l=group('#m1len',RQ.M1.lengths,v=>fx(v,2)+' m',fx(st.m1.L,2),v=>{st.m1.L=+v;draw1()});
+// fix: lengths labels data-v must match fx(v,2)
+$$('#m1len button').forEach((b,i)=>b.dataset.v=fx(RQ.M1.lengths[i],2)); g1l.set(fx(st.m1.L,2),true);
+const g2s=group('#m2sensor',null,null,st.m2.sensor,v=>{st.m2.sensor=v;draw2()});
+const g3s=group('#m3sensor',null,null,st.m3.sensor,v=>{st.m3.sensor=v;draw3()});
+const g3l=group('#m3load',RQ.M3.loads,v=>v+' kg',st.m3.load,v=>{st.m3.load=+v;draw3()});
+const sp=RQ.M2.speeds;
+function slider(id,lab,obj){ const r=$(id); r.value=sp.indexOf(obj.v); const upd=()=>{obj.v=sp[+r.value]; $(lab).textContent=fx(obj.v,2)+' m/s';}; r.oninput=()=>{upd(); id==='#m2v'?draw2():draw3();}; upd(); return {set:v=>{r.value=sp.indexOf(v);upd();}}; }
+const s2=slider('#m2v','#m2vlab',st.m2), s3=slider('#m3v','#m3vlab',st.m3);
+$('#m1reset').onclick=()=>{g1m.set(RQ.START.m1.motor);g1g.set(RQ.START.m1.gear);g1l.set(fx(RQ.START.m1.L,2));res1=null;out1();draw1()};
+$('#m2reset').onclick=()=>{g2s.set(RQ.START.m2.sensor);s2.set(RQ.START.m2.v);res2=null;out2();draw2()};
+$('#m3reset').onclick=()=>{g3s.set(RQ.START.m3.sensor);s3.set(RQ.START.m3.v);g3l.set(RQ.START.m3.load);res3=null;out3();draw3()};
+// ---------- canvas helpers ----------
+function ctxOf(id){const c=$(id);return c.getContext('2d');}
+function rr(x,ctx,X,Y,W,H,R,fill,stroke,lw){ctx.beginPath();ctx.moveTo(X+R,Y);ctx.arcTo(X+W,Y,X+W,Y+H,R);ctx.arcTo(X+W,Y+H,X,Y+H,R);ctx.arcTo(X,Y+H,X,Y,R);ctx.arcTo(X,Y,X+W,Y,R);ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw||2;ctx.stroke();}}
+function txt(ctx,s,x,y,size,color,align,weight){ctx.font=`${weight||'400'} ${size||14}px Calibri, Carlito, Arial, sans-serif`;ctx.fillStyle=color||C.ink;ctx.textAlign=align||'left';ctx.fillText(s,x,y);}
+let anim={};
+function animate(key,dur,frame,done,skip){ cancelAnimationFrame(anim[key]); if(skip){frame(1);done&&done();return;} const t0=performance.now(); const step=t=>{const p=Math.min(1,(t-t0)/dur); frame(p); if(p<1) anim[key]=requestAnimationFrame(step); else done&&done();}; anim[key]=requestAnimationFrame(step); }
+const ease=p=>p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+// ---------- MISSION 1 drawing ----------
+const packCol={red:'#D9534F',blue:'#3B7DD8',green:'#2E9E5B'};
+function draw1(angleDeg, sag, holding, flying, statusText){
+  const ctx=ctxOf('#c1'); const W=760,H=380; ctx.clearRect(0,0,W,H);
+  // floor & table
+  ctx.fillStyle='#F2F7F9';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#DCE7EC';ctx.fillRect(0,300,W,80);
+  const px=380, py=250; const scale=520; // 1 m = 520 px
+  const L=st.m1.L; const Lp=L*scale;
+  // bins at reach 0.38 m right; pickup at left
+  const reachP=RQ.M1.binReach*scale;
+  // pickup table left
+  rr(0,ctx,px-reachP-55,268,110,32,5,'#C9D8E0');
+  txt(ctx,'pickup',px-reachP,320,13,C.ink,'center');
+  // bins right
+  const bx=px+reachP; ['red','blue','green'].forEach((c,i)=>{ rr(0,ctx,bx-48+i*34,262,30,38,4,'#fff',packCol[c],3); });
+  txt(ctx,'bins (0.38 m)',bx,320,13,C.ink,'center');
+  // reach guide
+  ctx.setLineDash([5,5]);ctx.strokeStyle=C.grey;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(px,py,reachP,Math.PI,2*Math.PI);ctx.stroke();ctx.setLineDash([]);
+  // base robot body
+  rr(0,ctx,px-70,262,140,40,10,C.navy);
+  ctx.fillStyle=C.ink;[px-45,px+45].forEach(x=>{ctx.beginPath();ctx.arc(x,306,16,0,7);ctx.fill();ctx.fillStyle='#56708a';ctx.beginPath();ctx.arc(x,306,6,0,7);ctx.fill();ctx.fillStyle=C.ink;});
+  rr(0,ctx,px-26,222,52,42,8,C.teal);
+  // shoulder motor + gearbox
+  ctx.fillStyle=C.amber;ctx.beginPath();ctx.arc(px,py-20,20,0,7);ctx.fill();
+  ctx.fillStyle=C.navy;ctx.beginPath();ctx.arc(px,py-20,8,0,7);ctx.fill();
+  // arm
+  const ang=(angleDeg==null?180:angleDeg)*Math.PI/180; // 180 = pointing left, 0 = right
+  const sagR=(sag||0)*Math.PI/180;
+  const a=ang - sagR*Math.cos(ang); // sag rotates toward the floor
+  const ex=px+Lp*Math.cos(a), ey=py-20-Lp*Math.sin(a);
+  ctx.strokeStyle='#8FA7B8';ctx.lineWidth=14;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(px,py-20);ctx.lineTo(ex,ey);ctx.stroke();
+  ctx.strokeStyle='#B9CBD6';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(px,py-20);ctx.lineTo(ex,ey);ctx.stroke();
+  // gripper + color sensor
+  ctx.save();ctx.translate(ex,ey);ctx.rotate(-a);
+  ctx.fillStyle=C.ink;ctx.fillRect(-4,-12,16,24);
+  ctx.fillStyle=C.teal2;ctx.beginPath();ctx.arc(4,0,4,0,7);ctx.fill();
+  ctx.strokeStyle=C.ink;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(12,-12);ctx.lineTo(24,-8);ctx.moveTo(12,12);ctx.lineTo(24,8);ctx.stroke();
+  ctx.restore();
+  // held pack hangs below gripper
+  if(holding){ ctx.fillStyle=packCol[holding]; rr(0,ctx,ex-12,ey+8,24,22,4,packCol[holding]); }
+  if(flying){ rr(0,ctx,flying.x-12,flying.y-11,24,22,4,packCol[flying.c]); }
+  // labels
+  txt(ctx,`arm ${fx(L,2)} m`,px+6,py-48,13,C.ink,'left','700');
+  const m=RQ.M1.motors[st.m1.motor];
+  txt(ctx,`${m.name}  ·  gear ${st.m1.gear}:1`,16,26,16,C.navy,'left','700');
+  if(statusText) { rr(0,ctx,W-300,10,288,30,8,statusText.ok?'#DFF5EC':'#FBE3E2'); txt(ctx,statusText.t,W-156,30,15,statusText.ok?'#17603A':'#8A2421','center','700'); }
+}
+let res1=null;
+$('#m1run').onclick=()=>{
+  const r=RQ.m1(st.m1.motor,st.m1.gear,st.m1.L); res1=r;
+  const skip=$('#m1fast').checked;
+  const seq=['red','blue','green','red','blue','green'];
+  const fail=!r.pass;
+  // animation: three representative packs; pace scaled to real joint speed
+  const perPack=Math.min(1100,Math.max(380,1000*Math.PI/r.wj/2.2));
+  let i=0; $('#m1run').disabled=true;
+  const next=()=>{
+    if(i>=6){ finish1(r); return; }
+    const c=seq[i]; const k=i; i++;
+    const canLift=r.lifts[k%3] && r.reachOK;
+    const tooFast=!r.tipOK;
+    animate('a1',perPack,p=>{
+      if(!canLift){ // strains, sags toward the floor, drops the pack
+        const s=Math.sin(Math.min(1,p*1.5)*Math.PI/2);
+        draw1(180-10*s, 22*s, p<0.7?c:null, null, {ok:false,t: r.reachOK?'Arm stalls: not enough torque':'Arm cannot reach the bins'});
+      } else if(tooFast && p>0.45){
+        const q=(p-0.45)/0.55; draw1(Math.max(0,180-180*ease(p)*1.15),0,null,{x:380+60+q*300,y:110-120*q+280*q*q,c},{ok:false,t:'Too fast: pack flung, sensor misread'});
+      } else {
+        const e=ease(p); draw1(180-180*e,0,c,null,{ok:true,t:`Pack ${k+1} of 6`});
+      }
+    },()=>{ if(!canLift||tooFast){ finish1(r); } else next(); }, skip);
+  };
+  if(skip){ draw1(r.pass?0:180-12,r.pass?0:(r.torqueOK?0:25),null,null,{ok:r.pass,t:r.pass?'All packs sorted':'Design fails'}); finish1(r);} else next();
+};
+function finish1(r){
+  $('#m1run').disabled=false;
+  draw1(r.pass?0:(r.torqueOK&&r.reachOK?0:168), r.torqueOK&&r.reachOK?0:25, null,null,{ok:r.pass,t:r.pass?`All 6 packs sorted in ${fx(r.total,1)} s`:'Design fails'});
+  S.m1.push({motor:r.motor,gear:r.gear,L:r.L,tauOut:r.tauOut,tauSafe:r.tauSafe,tip:r.tip,total:r.total,current:r.current,pass:r.pass,fails:r.fails});
+  save(); out1(); table1(); dots();
+}
+function tile(k,v,ok){return `<div class="tile ${ok===true?'ok':ok===false?'bad':''}"><div class="k">${k}</div><div class="v">${v}</div></div>`;}
+function verdict(r,okText){ return r.pass?`<div class="verdict ok">✔ PASS: ${okText}</div>`:`<div class="verdict bad">✘ FAIL<ul>${r.fails.map(f=>'<li>'+f+'</li>').join('')}</ul></div>`; }
+function out1(){ const r=res1; if(!r){$('#m1out').innerHTML='<div class="verdict wait">Choose your settings, predict what will happen, then press Run test.</div>';return;}
+  $('#m1out').innerHTML=`<div class="res">${tile('Output torque',fx(r.tauOut)+' N·m',r.torqueOK)}${tile('Torque needed × 1.5',fx(r.tauSafe)+' N·m')}${tile('Arm speed ω',fx(r.wj)+' rad/s')}${tile('Gripper tip speed',fx(r.tip)+' m/s',r.tipOK)}${tile('Reach',fx(r.L,2)+' m',r.reachOK)}${tile('Time for 6 packs',fx(r.total,1)+' s',r.timeOK)}${tile('Motor current (12 V)',fx(r.current)+' A')}</div>
+  <p class="note">Lifts: ${RQ.M1.objects.map((o,i)=>`${o.color} ${o.mass} kg ${r.lifts[i]?'✔':'✘'}`).join(' · ')}</p>${verdict(r,'every pack sorted. Can you make it faster?')}`; }
+// ---------- MISSION 2 drawing ----------
+function drawRobotSide(ctx,x,y,s,sensorKey,load,beam){
+  // body
+  if(beam){ ctx.fillStyle=beam.color; ctx.beginPath(); ctx.moveTo(x+46*s,y-28*s); ctx.lineTo(x+46*s+beam.len,y-28*s-beam.spread); ctx.lineTo(x+46*s+beam.len,y-28*s+beam.spread); ctx.closePath(); ctx.fill(); }
+  rr(0,ctx,x-44*s,y-40*s,90*s,30*s,7*s,C.navy);
+  rr(0,ctx,x-30*s,y-56*s,40*s,18*s,5*s,C.teal);
+  if(load){ rr(0,ctx,x-36*s,y-74*s,50*s,20*s,3*s,'#fff',C.red,2); ctx.fillStyle=C.red; ctx.fillRect(x-14*s,y-70*s,6*s,12*s); ctx.fillRect(x-17*s,y-67*s,12*s,6*s); }
+  ctx.fillStyle=sensorKey==='LI'?C.amber:sensorKey==='US'?C.teal2:'#E86F6F';
+  rr(0,ctx,x+38*s,y-36*s,12*s,14*s,3*s,ctx.fillStyle);
+  ctx.fillStyle=C.ink; [x-26*s,x+26*s].forEach(cx=>{ctx.beginPath();ctx.arc(cx,y-8*s,10*s,0,7);ctx.fill();});
+  ctx.fillStyle='#8FA7B8'; [x-26*s,x+26*s].forEach(cx=>{ctx.beginPath();ctx.arc(cx,y-8*s,4*s,0,7);ctx.fill();});
+}
+function drawWorker(ctx,x,y,crash){
+  ctx.fillStyle=crash?C.red:'#E9B44C'; rr(0,ctx,x-12,y-82,24,40,8,ctx.fillStyle);
+  ctx.fillStyle='#8C6A4F'; ctx.beginPath(); ctx.arc(x,y-92,10,0,7); ctx.fill();
+  ctx.fillStyle=C.amber; rr(0,ctx,x-12,y-104,24,8,4,C.amber);
+  ctx.strokeStyle=C.ink; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(x-6,y-42); ctx.lineTo(x-8,y); ctx.moveTo(x+6,y-42); ctx.lineTo(x+8,y); ctx.stroke();
+}
+function draw2(robotX,stopInfo){
+  const ctx=ctxOf('#c2'); const W=760,H=380; ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#F2F7F9'; ctx.fillRect(0,0,W,H);
+  const s=RQ.M2.sensors[st.m2.sensor]; const r=RQ.m2(st.m2.sensor,st.m2.v);
+  const ppm=W/10; // show 10 m window; 1 m = 76 px
+  const floorY=290;
+  ctx.fillStyle='#DCE7EC'; ctx.fillRect(0,floorY,W,90);
+  for(let m=0;m<=10;m++){ ctx.fillStyle=C.grey; ctx.fillRect(m*ppm,floorY,2,10); txt(ctx,m+' m',m*ppm+3,floorY+24,11,'#4a6378'); }
+  const front0=60; // px of robot front at detection
+  const obstacleX=front0+s.range*ppm;
+  const rx=robotX==null?front0-46:robotX;
+  const beam={len:Math.min(s.range*ppm, W), spread: st.m2.sensor==='LI'?6:st.m2.sensor==='US'?40:14, color: st.m2.sensor==='LI'?'rgba(242,165,65,.35)':st.m2.sensor==='US'?'rgba(46,196,182,.22)':'rgba(232,111,111,.25)'};
+  drawRobotSide(ctx,rx,floorY,1,st.m2.sensor,false,beam);
+  if(obstacleX<W-10) drawWorker(ctx,obstacleX+14,floorY,stopInfo&&stopInfo.crash);
+  else txt(ctx,'obstacle at '+fx(s.range,1)+' m →',W-10,floorY-60,14,C.ink,'right','700');
+  // stopping distance bars
+  const by=318, x0=front0;
+  const reactP=r.reaction*ppm, brakeP=r.braking*ppm, allowP=r.allowed*ppm;
+  ctx.fillStyle=C.amber; ctx.fillRect(x0,by,Math.min(reactP,W-x0),14);
+  ctx.fillStyle=C.teal; ctx.fillRect(x0+reactP,by,Math.max(0,Math.min(brakeP,W-x0-reactP)),14);
+  ctx.fillStyle=C.navy; ctx.fillRect(Math.min(x0+allowP,W-3),by-8,3,30);
+  // legend (bottom-right) instead of labels on the bars
+  const lx=W-330, ly=by+30; ctx.fillStyle=C.amber; ctx.fillRect(lx,ly-10,14,10); txt(ctx,'reaction distance',lx+18,ly,12,C.ink);
+  ctx.fillStyle=C.teal; ctx.fillRect(lx+128,ly-10,14,10); txt(ctx,'braking distance',lx+146,ly,12,C.ink);
+  ctx.fillStyle=C.navy; ctx.fillRect(lx+252,ly-12,3,14); txt(ctx,'safe limit',lx+260,ly,12,C.ink);
+  txt(ctx,`${s.name} · ${fx(st.m2.v,2)} m/s`,16,26,16,C.navy,'left','700');
+  txt(ctx,`a = F ÷ m = 50 N ÷ 20 kg = 2.5 m/s²`,16,48,14,C.ink);
+  if(stopInfo){ rr(0,ctx,W-300,10,288,30,8,stopInfo.crash?'#FBE3E2':'#DFF5EC'); txt(ctx,stopInfo.t,W-156,30,15,stopInfo.crash?'#8A2421':'#17603A','center','700'); }
+}
+let res2=null;
+$('#m2run').onclick=()=>{
+  const r=RQ.m2(st.m2.sensor,st.m2.v); res2=r; const skip=$('#m2fast').checked;
+  const s=RQ.M2.sensors[r.sensor]; const ppm=76; const front0=60;
+    const crash=!r.stopOK;
+  $('#m2run').disabled=true;
+  // phase: approach (robot enters from left at speed), detect at front0, react, brake
+  const dur=2600;
+  animate('a2',dur,p=>{
+    // map p to distance travelled after detection
+    const d = (crash? Math.min(s.range, r.stop):r.stop)*ease(Math.min(1,p*1.05));
+    draw2(front0-46+d*ppm, p>0.95?{crash, t: crash?'CRASH: could not stop in time':`Stopped with ${fx(r.margin+RQ.M2.buffer,2)} m to spare`}:null);
+  },()=>{ finish2(r); }, skip);
+};
+function finish2(r){ $('#m2run').disabled=false; const s=RQ.M2.sensors[r.sensor];
+  draw2(60-46+Math.min(r.stop,s.range)*76,{crash:!r.stopOK,t:!r.stopOK?'CRASH: could not stop in time':`Stopped with ${fx(r.margin+RQ.M2.buffer,2)} m to spare`});
+  S.m2.push({sensor:r.sensor,v:r.v,reaction:r.reaction,braking:r.braking,stop:r.stop,allowed:r.allowed,time:r.time,pass:r.pass,fails:r.fails}); save(); out2(); table2(); dots(); }
+function out2(){ const r=res2; if(!r){$('#m2out').innerHTML='<div class="verdict wait">Reaction time + braking: can your robot stop inside its sensor range?</div>';return;}
+  $('#m2out').innerHTML=`<div class="res">${tile('Reaction distance',fx(r.reaction)+' m')}${tile('Braking distance',fx(r.braking)+' m')}${tile('Stopping distance',fx(r.stop)+' m',r.stopOK)}${tile('Safe limit (range − 0.30 m)',fx(r.allowed)+' m')}${tile('Course time',fx(r.time,1)+' s',r.timeOK)}${r.echo?tile('Echo time at full range',fx(r.echo*1000,1)+' ms'):''}</div>${verdict(r,'the robot always stops in time. Can it go faster?')}`; }
+// ---------- MISSION 3 drawing ----------
+function draw3(prog,battLeft,trip,status){
+  const ctx=ctxOf('#c3'); const W=760,H=380; ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#F2F7F9'; ctx.fillRect(0,0,W,H);
+  const y=230;
+  // route
+  ctx.fillStyle='#DCE7EC'; ctx.fillRect(0,y,W,60);
+  // hazard zone
+  for(let x=250;x<520;x+=26){ ctx.fillStyle='rgba(242,165,65,.55)'; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+13,y); ctx.lineTo(x+1,y+60); ctx.lineTo(x-12,y+60); ctx.fill(); }
+  txt(ctx,'smoke and rubble zone',385,y+82,13,'#9A6A12','center','700');
+  // rubble
+  ctx.fillStyle='#8FA7B8'; [[300,y-6],[360,y-4],[455,y-7]].forEach(([a,b])=>{ctx.beginPath();ctx.moveTo(a,b+6);ctx.lineTo(a+14,b-6);ctx.lineTo(a+30,b+6);ctx.fill();});
+  // depot
+  rr(0,ctx,14,y-90,92,90,6,'#fff',C.ink,2); txt(ctx,'SUPPLY',60,y-60,13,C.navy,'center','700'); txt(ctx,'DEPOT',60,y-44,13,C.navy,'center','700');
+  // clinic
+  rr(0,ctx,W-108,y-100,94,100,6,'#fff',C.ink,2); ctx.fillStyle=C.red; ctx.fillRect(W-67,y-86,12,32); ctx.fillRect(W-77,y-76,32,12);
+  txt(ctx,'FIELD CLINIC',W-61,y-34,12,C.navy,'center','700'); txt(ctx,'300 m',W/2,y+108,13,C.ink,'center');
+  // robot position
+  const p = prog==null?0:prog; // 0..1 one leg out, 1..2 back
+  const xOut=110, xIn=W-150; let rx, loaded;
+  if(p<=1){ rx=xOut+(xIn-xOut)*p; loaded=true; } else { rx=xIn-(xIn-xOut)*(p-1); loaded=false; }
+  const s=RQ.M2.sensors[st.m3.sensor];
+  drawRobotSide(ctx,rx,y,0.85,st.m3.sensor,loaded&&prog!=null,{len:Math.min(s.range*40,220)*(p<=1?1:-1),spread:st.m3.sensor==='US'?22:st.m3.sensor==='LI'?4:8,color:'rgba(46,196,182,.18)'});
+  // battery gauge
+  const bl = battLeft==null?100:battLeft;
+  rr(0,ctx,16,16,170,46,8,'#fff',C.ink,2); rr(0,ctx,186,30,8,18,2,C.ink);
+  const col= bl<20?C.red: bl<40?C.amber:C.teal2; rr(0,ctx,20,20,Math.max(0,162*bl/100),38,6,col);
+  ctx.fillStyle=C.navy; ctx.fillRect(20+162*0.2,14,2,50);
+  txt(ctx,fx(bl,0)+'%',101,46,18,C.navy,'center','700'); txt(ctx,'20% reserve',20+162*0.2+4,78,11,'#4a6378');
+  txt(ctx,`${s.name} · ${fx(st.m3.v,2)} m/s · ${st.m3.load} kg per trip`,210,34,15,C.navy,'left','700');
+  if(trip) txt(ctx,trip,210,56,14,C.ink);
+  if(status){ rr(0,ctx,W-300,70,288,30,8,status.ok?'#DFF5EC':'#FBE3E2'); txt(ctx,status.t,W-156,90,15,status.ok?'#17603A':'#8A2421','center','700'); }
+}
+let res3=null;
+$('#m3run').onclick=()=>{
+  const r=RQ.m3(st.m3.sensor,st.m3.v,st.m3.load); res3=r; const skip=$('#m3fast').checked;
+  $('#m3run').disabled=true;
+  const trips=r.trips; const legMs=Math.max(450, Math.min(1200, 2400/trips));
+  const dur=legMs*2*trips;
+  animate('a3',dur,p=>{
+    const tp=p*trips; const k=Math.min(trips-1,Math.floor(tp)); const within=(tp-k)*2;
+    const left=100-100*r.used*p;
+    let status=null;
+    if(!r.stopOK && within>0.45 && within<1 && k===0) status={ok:false,t:'Loaded robot cannot stop in time!'};
+    if(!r.currentOK && k===0 && within<1) status={ok:false,t:`Driver overload: ${fx(r.peakCurrent)} A > 4.0 A`};
+    draw3(within,left,`Trip ${k+1} of ${trips}`,status);
+  },()=>finish3(r),skip);
+};
+function finish3(r){ $('#m3run').disabled=false;
+  draw3(2,100-100*r.used,`${r.trips} trips · ${fx(r.time/60,2)} min`,{ok:r.pass,t:r.pass?`Delivered! Score ${fx(r.score,1)}`:'Mission failed'});
+  S.m3.push({sensor:r.sensor,v:r.v,load:r.load,trips:r.trips,time:r.time,peakCurrent:r.peakCurrent,batteryLeft:r.batteryLeft,stop:r.stop,allowed:r.allowed,score:r.score,pass:r.pass,fails:r.fails}); save(); out3(); table3(); dots(); }
+function out3(){ const r=res3; if(!r){$('#m3out').innerHTML='<div class="verdict wait">Faster saves time but costs energy. Heavier loads mean fewer trips but longer stops and more current.</div>';return;}
+  $('#m3out').innerHTML=`<div class="res">${tile('Trips',r.trips)}${tile('Mission time',fx(r.time/60,2)+' min',r.timeOK)}${tile('Stopping (loaded)',fx(r.stop)+' / '+fx(r.allowed)+' m',r.stopOK)}${tile('Current while loaded',fx(r.peakCurrent)+' A',r.currentOK)}${tile('Energy used',fx(r.Ewh,1)+' Wh of 24')}${tile('Battery left',fx(r.batteryLeft,1)+'%',r.batteryOK)}${tile('Power while loaded',fx(r.pDriveLoaded+r.pElec,1)+' W')}${tile('Rescue Score',r.pass?fx(r.score,1):'—',r.pass?true:null)}</div>${verdict(r,`Rescue Score ${fx(r.score,1)}. Can you beat it?`)}`; }
+// ---------- tables ----------
+function bestIndex(arr,key,dir){ let bi=-1,bv=null; arr.forEach((t,i)=>{ if(!t.pass) return; const v=t[key]; if(bv===null || (dir<0? v<bv-1e-9 : v>bv+1e-9)){bv=v;bi=i;} }); return bi; }
+function resCell(t){ return t.pass?'<td class="pass">PASS</td>':`<td class="fail" title="${t.fails.join('; ')}">FAIL</td>`; }
+function table1(){ const b=bestIndex(S.m1,'total',-1);
+  $('#t1').innerHTML=S.m1.length? `<table><tr><th>#</th><th>Motor</th><th>Gear</th><th>Arm (m)</th><th>Output torque (N·m)</th><th>Needed × 1.5 (N·m)</th><th>Tip speed (m/s)</th><th>Time (s)</th><th>Current (A)</th><th>Result</th></tr>${S.m1.map((t,i)=>`<tr class="${i===b?'best':''}"><td>${i+1}</td><td>${t.motor}</td><td>${t.gear}:1</td><td>${fx(t.L,2)}</td><td>${fx(t.tauOut)}</td><td>${fx(t.tauSafe)}</td><td>${fx(t.tip)}</td><td>${fx(t.total,1)}</td><td>${fx(t.current)}</td>${resCell(t)}</tr>`).join('')}</table>`:'<p class="note">No trials yet.</p>'; }
+function table2(){ const b=bestIndex(S.m2,'time',-1);
+  $('#t2').innerHTML=S.m2.length? `<table><tr><th>#</th><th>Sensor</th><th>Speed (m/s)</th><th>Reaction d (m)</th><th>Braking d (m)</th><th>Stopping d (m)</th><th>Safe limit (m)</th><th>Course time (s)</th><th>Result</th></tr>${S.m2.map((t,i)=>`<tr class="${i===b?'best':''}"><td>${i+1}</td><td>${RQ.M2.sensors[t.sensor].name}</td><td>${fx(t.v,2)}</td><td>${fx(t.reaction)}</td><td>${fx(t.braking)}</td><td>${fx(t.stop)}</td><td>${fx(t.allowed)}</td><td>${fx(t.time,1)}</td>${resCell(t)}</tr>`).join('')}</table>`:'<p class="note">No trials yet.</p>'; }
+function table3(){ const b=bestIndex(S.m3,'score',1);
+  $('#t3').innerHTML=S.m3.length? `<table><tr><th>#</th><th>Sensor</th><th>Speed (m/s)</th><th>Load (kg)</th><th>Trips</th><th>Time (min)</th><th>Current (A)</th><th>Battery left (%)</th><th>Stop / limit (m)</th><th>Score</th><th>Result</th></tr>${S.m3.map((t,i)=>`<tr class="${i===b?'best':''}"><td>${i+1}</td><td>${RQ.M2.sensors[t.sensor].name}</td><td>${fx(t.v,2)}</td><td>${t.load}</td><td>${t.trips}</td><td>${fx(t.time/60,2)}</td><td>${fx(t.peakCurrent)}</td><td>${fx(t.batteryLeft,1)}</td><td>${fx(t.stop)} / ${fx(t.allowed)}</td><td>${t.pass?fx(t.score,1):'—'}</td>${resCell(t)}</tr>`).join('')}</table>`:'<p class="note">No trials yet.</p>'; }
+function dots(){ $('#d1').classList.toggle('ok',S.m1.some(t=>t.pass)); $('#d2').classList.toggle('ok',S.m2.some(t=>t.pass)); $('#d3').classList.toggle('ok',S.m3.some(t=>t.pass)); }
+// ---------- export ----------
+function csvEscape(v){ v=String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+$('#csv').onclick=()=>{
+  const rows=[['Student',S.name],['Class',S.klass],['Exported',new Date().toLocaleString()],[]];
+  rows.push(['Mission 1: Precision Sorting']); rows.push(['Trial','Motor','Gear ratio','Arm length (m)','Output torque (N m)','Torque needed x1.5 (N m)','Tip speed (m/s)','Time (s)','Motor current (A)','Result','Reasons','Best']);
+  const b1=bestIndex(S.m1,'total',-1); S.m1.forEach((t,i)=>rows.push([i+1,t.motor,t.gear,fx(t.L,2),fx(t.tauOut),fx(t.tauSafe),fx(t.tip),fx(t.total,1),fx(t.current),t.pass?'PASS':'FAIL',t.fails.join('; '),i===b1?'BEST':'']));
+  rows.push([]); rows.push(['Mission 2: Obstacle Avoidance']); rows.push(['Trial','Sensor','Speed (m/s)','Reaction distance (m)','Braking distance (m)','Stopping distance (m)','Safe limit (m)','Course time (s)','Result','Reasons','Best']);
+  const b2=bestIndex(S.m2,'time',-1); S.m2.forEach((t,i)=>rows.push([i+1,RQ.M2.sensors[t.sensor].name,fx(t.v,2),fx(t.reaction),fx(t.braking),fx(t.stop),fx(t.allowed),fx(t.time,1),t.pass?'PASS':'FAIL',t.fails.join('; '),i===b2?'BEST':'']));
+  rows.push([]); rows.push(['Mission 3: Rescue Run']); rows.push(['Trial','Sensor','Speed (m/s)','Load (kg)','Trips','Time (min)','Current while loaded (A)','Battery left (%)','Stopping distance (m)','Safe limit (m)','Rescue Score','Result','Reasons','Best']);
+  const b3=bestIndex(S.m3,'score',1); S.m3.forEach((t,i)=>rows.push([i+1,RQ.M2.sensors[t.sensor].name,fx(t.v,2),t.load,t.trips,fx(t.time/60,2),fx(t.peakCurrent),fx(t.batteryLeft,1),fx(t.stop),fx(t.allowed),t.pass?fx(t.score,1):'',t.pass?'PASS':'FAIL',t.fails.join('; '),i===b3?'BEST':'']));
+  const csv=rows.map(r=>r.map(csvEscape).join(',')).join('\r\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv'}); const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=`RoboQuest_${(S.name||'student').replace(/[^A-Za-z0-9_-]+/g,'_')}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+};
+$('#clear').onclick=()=>{ if(!S.m1.length&&!S.m2.length&&!S.m3.length) return; const box=$('#summary'); box.innerHTML='<div class="verdict bad">Delete all trials? <button class="btn sec" id="yes">Yes, delete</button> <button class="btn ghost" id="no">Keep them</button></div>'; $('#yes').onclick=()=>{S.m1=[];S.m2=[];S.m3=[];save();table1();table2();table3();dots();renderSummary();}; $('#no').onclick=renderSummary; };
+$('#print').onclick=()=>{ renderSummary(); window.print(); };
+function renderSummary(){ const b1=S.m1[bestIndex(S.m1,'total',-1)], b2=S.m2[bestIndex(S.m2,'time',-1)], b3=S.m3[bestIndex(S.m3,'score',1)];
+  $('#summary').innerHTML=`<table><tr><th>Mission</th><th>Trials</th><th>Your best passing design</th><th>Result</th></tr>
+  <tr><td>1 · Precision Sorting</td><td>${S.m1.length}</td><td>${b1?`Motor ${b1.motor}, ${b1.gear}:1, ${fx(b1.L,2)} m arm`:'—'}</td><td>${b1?fx(b1.total,1)+' s':'not passed yet'}</td></tr>
+  <tr><td>2 · Obstacle Avoidance</td><td>${S.m2.length}</td><td>${b2?`${RQ.M2.sensors[b2.sensor].name}, ${fx(b2.v,2)} m/s`:'—'}</td><td>${b2?fx(b2.time,1)+' s':'not passed yet'}</td></tr>
+  <tr><td>3 · Rescue Run</td><td>${S.m3.length}</td><td>${b3?`${RQ.M2.sensors[b3.sensor].name}, ${fx(b3.v,2)} m/s, ${b3.load} kg`:'—'}</td><td>${b3?'Score '+fx(b3.score,1):'not passed yet'}</td></tr></table>
+  <p class="note">Student: ${S.name||'—'} · Class: ${S.klass||'—'}</p>`; }
+// ---------- electronics bench ----------
+const INFO={
+ bat:['Battery','Stores chemical energy. Energy (Wh) = voltage × capacity = 24 V × 1.0 Ah = 24 Wh = 86,400 J. Current drawn: I = P ÷ V. Drawing 48 W from 24 V takes 2 A.'],
+ fuse:['Fuse and emergency stop','The fuse melts if the current gets dangerously high. The emergency stop cuts power to the motors at once. Every real robot that works near people has one. Notice that the motors get their power straight from the battery (thick line), not from the microcontroller.'],
+ reg:['Voltage regulator','The microcontroller and sensors need a steady 5 V, but the battery gives 24 V (and drops as it empties). The regulator holds the output at 5 V.'],
+ mcu:['Microcontroller (the "brain")','A tiny computer that reads the sensors, runs the program, and sends commands. It cannot power a motor itself: its pins give only a few milliamps, so it sends a low-power PWM signal to the motor driver.'],
+ drv:['Motor driver (H-bridge)','Four electronic switches that let a small signal control a big current. Closing one pair of switches spins the motor forward; the other pair spins it backward. Its 4.0 A limit is a real constraint in Mission 3.'],
+ mot:['DC motors and encoders','Current in coils inside a magnetic field produces a force, which makes a torque on the rotor. More current gives more torque; more voltage gives more speed. A gearbox trades that speed for torque. An encoder on each motor counts slots on a spinning disk, so the microcontroller knows how far the wheel or joint has turned: that is feedback.'],
+ sens:['Distance sensors','IR measures reflected infrared light (short range). Ultrasonic times an echo of sound (distance = 343 × t ÷ 2). LiDAR times a laser pulse (long range, more power). Range and reaction time set your safe speed.'],
+ enc:['Color sensor','The color sensor shines white light on a pack and measures how much red, green and blue light reflects back. It needs the pack to be still for a moment, which is why Mission 1 limits the gripper tip speed.']
+};
+$$('#wiring .block').forEach(g=>g.onclick=()=>{ const [h,p]=INFO[g.dataset.b]; $('#einfo').innerHTML=`<h3>${h}</h3><p>${p}</p>`; });
+function drawUS(){ const d=+$('#usr').value; const ctx=ctxOf('#cus'); ctx.clearRect(0,0,520,120); ctx.fillStyle='#F7FAFB'; ctx.fillRect(0,0,520,120);
+  const x0=40, ppm=110; ctx.fillStyle=C.teal2; rr(0,ctx,10,45,30,30,4,C.teal2); txt(ctx,'sensor',25,92,11,C.ink,'center');
+  const ox=x0+d*ppm; ctx.fillStyle=C.amber; rr(0,ctx,ox,30,16,60,3,C.amber);
+  ctx.strokeStyle=C.ink; ctx.lineWidth=1.5; for(let k=1;k<=3;k++){ ctx.beginPath(); ctx.arc(x0+(ox-x0)*k/3.2,60,14,-0.8,0.8); ctx.stroke(); }
+  ctx.strokeStyle=C.teal; for(let k=1;k<=2;k++){ ctx.beginPath(); ctx.arc(ox-(ox-x0)*k/3,60,12,Math.PI-0.8,Math.PI+0.8); ctx.stroke(); }
+  txt(ctx,fx(d,2)+' m',(x0+ox)/2,22,13,C.navy,'center','700');
+  $('#usd').textContent=fx(d,2)+' m'; $('#ust').textContent=`t = 2 × ${fx(d,2)} m ÷ 343 m/s = ${fx(2*d/343*1000,2)} ms`; }
+$('#usr').oninput=drawUS;
+function drawPWM(){ const dc=+$('#pwmr').value/100; const ctx=ctxOf('#cpwm'); ctx.clearRect(0,0,520,120); ctx.fillStyle='#F7FAFB'; ctx.fillRect(0,0,520,120);
+  const top=20,bot=95,per=100; ctx.strokeStyle=C.navy; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(10,bot);
+  for(let k=0;k<5;k++){ const x=10+k*per; if(dc>0){ctx.lineTo(x,bot);ctx.lineTo(x,top);ctx.lineTo(x+per*dc,top);ctx.lineTo(x+per*dc,bot);} ctx.lineTo(x+per,bot);} ctx.stroke();
+  const avgY=bot-(bot-top)*dc; ctx.setLineDash([6,4]); ctx.strokeStyle=C.amber; ctx.beginPath(); ctx.moveTo(10,avgY); ctx.lineTo(510,avgY); ctx.stroke(); ctx.setLineDash([]);
+  txt(ctx,'24 V',12,top-6,11,C.ink); txt(ctx,'average',440,avgY-5,11,'#9A6A12','left','700');
+  $('#pwmd').textContent=Math.round(dc*100)+'%'; $('#pwmv').textContent=fx(24*dc,1)+' V'; $('#pwms').textContent=fx(3.2*dc,2)+' m/s (3.2 m/s at 100%)'; }
+$('#pwmr').oninput=drawPWM;
+function drawAll(){ draw1(); draw2(); draw3(); drawUS(); drawPWM(); }
+// hi-dpi canvases
+$$('canvas').forEach(c=>{ const w=c.width,h=c.height,d=Math.min(2,window.devicePixelRatio||1); c.width=w*d; c.height=h*d; c.getContext('2d').scale(d,d); });
+drawAll(); table1(); table2(); table3(); dots();
+})();
+</script>
+</body>
+</html>
